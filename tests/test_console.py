@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""del unitest for base model"""
+"""model unitest for base model"""
 from console import HBNBCommand
 import unittest
 import pep8
