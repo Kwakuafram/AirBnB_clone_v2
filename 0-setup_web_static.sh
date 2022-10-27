@@ -1,41 +1,21 @@
 #!/usr/bin/env bash
-# prepare your web servers
+# automated configuration of web server for web static
 
-if ! [ -x "$(command -v nginx)" ]; then apt update; apt install nginx -y; fi 
-
-if [ ! -d /data/ ]; then
-  mkdir /data/;
+# install nginx if it doesn't exist
+if ! command -v nginx &> /dev/null
+then
+    sudo apt-get -y update
+    sudo apt-get -y install nginx
 fi
 
-if [ ! -d /data/web_static/ ]; then
-  mkdir /data/web_static/;
-fi
+mkdir -p /data/web_static/{releases/test,shared}
 
-if [ ! -d /data/web_static/releases/ ]; then
-  mkdir /data/web_static/releases/;
-fi
+echo "<p>Test<p>" > /data/web_static/releases/test/index.html
 
-if [ ! -d /data/web_static/shared/ ]; then
-  mkdir /data/web_static/shared/;
-fi
+ln -sf /data/web_static/releases/test /data/web_static/current
 
-if [ ! -d /data/web_static/releases/test/ ]; then
-  mkdir /data/web_static/releases/test/;
-fi
+chown -R ubuntu:ubuntu /data
 
-if [ ! -d /data/web_static/releases/test/index.html ]; then
-  touch /data/web_static/releases/test/index.html;
-  echo Holberton Scholli | tee /data/web_static/releases/test/index.html
-fi
-
-if [ ! -d /data/web_static/current ]; then
-  ln -s /data/web_static/releases/test /data/web_static/current;
-else
-  rm /data/web_static/current;
-  ln -s /data/web_static/releases/test /data/web_static/current;
-fi
-sudo chown -R ubuntu:ubuntu /data/
-
-sed -i '/listen 80 default_server;/a \\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t\tautoindex off;\n\t}' /etc/nginx/sites-available/default
+sed -i '53i\\tlocation /hbnb_static {\n\t\talias /data/web_static/current;\n\t}' /etc/nginx/sites-available/default
 
 service nginx restart
